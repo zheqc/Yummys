@@ -245,4 +245,10 @@ public class MongoDBConnection implements DBConnection {
 		return null;
 	}
 
+	@Override
+	public void insertNewUser(String userId, String password, String last_name, String first_name) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

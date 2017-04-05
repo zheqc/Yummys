@@ -71,7 +71,7 @@ public interface DBConnection {
      * @return
      */
     //public JSONArray searchRestaurants(String userId, double lat, double lon, String term);
-    public JSONArray searchRestaurants(String userId, double lat, double lon);
+    public JSONArray searchRestaurants(String userId, double lat, double lon, String term);
    /**
      * Verify if the userId matches the password.
      * @param userId
@@ -86,5 +86,9 @@ public interface DBConnection {
      * @return First and Last Name
      */
     public String getFirstLastName(String userId);
+
+	public void insertNewUser(String userId, String password, String last_name, String first_name);
+
+	public boolean isNewUser(String userId);
 
 }

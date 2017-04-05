@@ -51,7 +51,7 @@ public class MySQLDBConnection implements DBConnection {
 	}
 
 	@Override
-	public JSONArray searchRestaurants(String userId, double lat, double lon) {
+	public JSONArray searchRestaurants(String userId, double lat, double lon, String term) {
 		try {
 			YelpAPI api = new YelpAPI();
 			JSONObject response = new JSONObject(api.searchForBusinessesByLocation(lat, lon));
@@ -94,13 +94,14 @@ public class MySQLDBConnection implements DBConnection {
 				statement.setString(11, url);
 				statement.execute();
 				// Perform filtering if term is specified.
-				/*if (term == null || term.isEmpty()) {
+
+				if (term == null || term.isEmpty()) {
 					list.add(obj);
 				} else {
 					if (categories.contains(term) || fullAddress.contains(term) || name.contains(term)) {
 						list.add(obj);
 					}
-				}*/
+				}
 			}
 			return new JSONArray(list);
 		} catch (Exception e) {
@@ -138,7 +139,7 @@ public class MySQLDBConnection implements DBConnection {
 		}
 	}
 
-//	private static final int MAX_RECOMMENDED_RESTAURANTS = 10;
+	// private static final int MAX_RECOMMENDED_RESTAURANTS = 10;
 
 	@Override
 	public JSONArray recommendRestaurants(String userId) {
@@ -177,99 +178,158 @@ public class MySQLDBConnection implements DBConnection {
 		return null;
 	}
 
-	 @Override
-		public Set<String> getCategories(String businessId) {
-			try {
-				String sql = "SELECT categories from restaurants WHERE business_id = ? ";
-				PreparedStatement statement = conn.prepareStatement(sql);
-				statement.setString(1, businessId);
-				ResultSet rs = statement.executeQuery();
-				if (rs.next()) {
-					Set<String> set = new HashSet<>();
-					String[] categories = rs.getString("categories").split(",");
-					for (String category : categories) {
-						// ' Japanese ' -> 'Japanese'
-						set.add(category.trim()); //delete space
-					}
-					return set;
+	@Override
+	public Set<String> getCategories(String businessId) {
+		try {
+			String sql = "SELECT categories from restaurants WHERE business_id = ? ";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setString(1, businessId);
+			ResultSet rs = statement.executeQuery();
+			if (rs.next()) {
+				Set<String> set = new HashSet<>();
+				String[] categories = rs.getString("categories").split(",");
+				for (String category : categories) {
+					// ' Japanese ' -> 'Japanese'
+					set.add(category.trim()); // delete space
 				}
-			} catch (Exception e) {
-				System.out.println(e.getMessage());
+				return set;
 			}
-			return new HashSet<String>();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
 		}
-
-		@Override
-		public Set<String> getBusinessId(String category) {
-			Set<String> set = new HashSet<>();
-			try {
-				// if category = Chinese, categories = Chinese, Korean, Japanese,
-				// it's a match
-				String sql = "SELECT business_id from restaurants WHERE categories LIKE ?";
-				PreparedStatement statement = conn.prepareStatement(sql);
-				statement.setString(1, "%" + category + "%");
-				ResultSet rs = statement.executeQuery();
-				while (rs.next()) {
-					String businessId = rs.getString("business_id");
-					set.add(businessId);
-				}
-			} catch (Exception e) {
-				System.out.println(e.getMessage());
-			}
-			return set;
-		}
-	              @Override
-		public JSONObject getRestaurantsById(String businessId, boolean isVisited) {
-			try {
-				String sql = "SELECT * from restaurants where business_id = ?";
-				PreparedStatement statement = conn.prepareStatement(sql);
-				statement.setString(1, businessId);
-				ResultSet rs = statement.executeQuery();
-				if (rs.next()) {
-					Restaurant restaurant = new Restaurant(
-							rs.getString("business_id"), rs.getString("name"),
-							rs.getString("categories"), rs.getString("city"),
-							rs.getString("state"), rs.getFloat("stars"),
-							rs.getString("full_address"), rs.getFloat("latitude"),
-							rs.getFloat("longitude"), rs.getString("image_url"),
-							rs.getString("url"));
-					JSONObject obj = restaurant.toJSONObject();
-					obj.put("is_visited", isVisited);
-					return obj;
-				}
-			} catch (Exception e) { /* report an error */
-				System.out.println(e.getMessage());
-			}
-			return null;
-		}
-	              @Override
-		public Set<String> getVisitedRestaurants(String userId) {
-			Set<String> visitedRestaurants = new HashSet<String>();
-			try {
-				String sql = "SELECT business_id from history WHERE user_id = ?";
-				PreparedStatement statement = conn.prepareStatement(sql);
-				statement.setString(1, userId);
-				ResultSet rs = statement.executeQuery();
-				while (rs.next()) {
-					String visitedRestaurant = rs.getString("business_id");
-					visitedRestaurants.add(visitedRestaurant);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return visitedRestaurants;
-		}
-
+		return new HashSet<String>();
+	}
 
 	@Override
-	public Boolean verifyLogin(String userId, String password) {
-		// TODO Auto-generated method stub
+	public Set<String> getBusinessId(String category) {
+		Set<String> set = new HashSet<>();
+		try {
+			// if category = Chinese, categories = Chinese, Korean, Japanese,
+			// it's a match
+			String sql = "SELECT business_id from restaurants WHERE categories LIKE ?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setString(1, "%" + category + "%");
+			ResultSet rs = statement.executeQuery();
+			while (rs.next()) {
+				String businessId = rs.getString("business_id");
+				set.add(businessId);
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return set;
+	}
+
+	@Override
+	public JSONObject getRestaurantsById(String businessId, boolean isVisited) {
+		try {
+			String sql = "SELECT * from restaurants where business_id = ?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setString(1, businessId);
+			ResultSet rs = statement.executeQuery();
+			if (rs.next()) {
+				Restaurant restaurant = new Restaurant(rs.getString("business_id"), rs.getString("name"),
+						rs.getString("categories"), rs.getString("city"), rs.getString("state"), rs.getFloat("stars"),
+						rs.getString("full_address"), rs.getFloat("latitude"), rs.getFloat("longitude"),
+						rs.getString("image_url"), rs.getString("url"));
+				JSONObject obj = restaurant.toJSONObject();
+				obj.put("is_visited", isVisited);
+				return obj;
+			}
+		} catch (Exception e) { /* report an error */
+			System.out.println(e.getMessage());
+		}
 		return null;
 	}
 
 	@Override
-	public String getFirstLastName(String userId) {
+	public Set<String> getVisitedRestaurants(String userId) {
+		Set<String> visitedRestaurants = new HashSet<String>();
+		try {
+			String sql = "SELECT business_id from history WHERE user_id = ?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setString(1, userId);
+			ResultSet rs = statement.executeQuery();
+			while (rs.next()) {
+				String visitedRestaurant = rs.getString("business_id");
+				visitedRestaurants.add(visitedRestaurant);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return visitedRestaurants;
+	}
+
+	@Override
+	public Boolean verifyLogin(String userId, String password) {
 		// TODO Auto-generated method stub
-		return null;
+		try {
+			if (conn == null) {
+				return false;
+			}
+			String sql = "SELECT user_id from users WHERE user_id=? and password=?";
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, userId);
+			pstmt.setString(2, password);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				return true;
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return false;
+
+	}
+
+	@Override
+	public String getFirstLastName(String userId) {
+		String name = "";
+		try {
+			if (conn != null) {
+				String sql = "SELECT first_name, last_name from users WHERE user_id = ?";
+				PreparedStatement statement = conn.prepareStatement(sql);
+				statement.setString(1, userId);
+				ResultSet rs = statement.executeQuery();
+				if (rs.next()) {
+					name += rs.getString("first_name") + " " + rs.getString("last_name");
+				}
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return name;
+	}
+	
+	public boolean isNewUser(String userId) {
+		try {
+			if (conn != null) {
+				String sql = "SELECT * from users WHERE user_id = ?";
+				PreparedStatement statement = conn.prepareStatement(sql);
+				statement.setString(1, userId);
+				ResultSet rs = statement.executeQuery();
+				if (rs.next()) {
+					return false;
+				}
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return true;
+	}
+	
+	
+	public void insertNewUser(String userId, String password, String first_name, String last_name) {
+		try {
+				String sql = "INSERT INTO users VALUES (?,?,?,?)";
+				PreparedStatement statement = conn.prepareStatement(sql);
+				statement.setString(1, userId);
+				statement.setString(2, password);
+				statement.setString(3, first_name);
+				statement.setString(4, last_name);
+				statement.executeUpdate();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
 }

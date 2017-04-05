@@ -7,15 +7,19 @@
 body {
   background:  #434343;
   color:       #FFFFFF;
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Delius Unicase', sans-serif;
   font-weight: 300;
   font-size:   0.9em;
+  background:  url('https://media.guim.co.uk/532cf499f348b378f769e01e2665229da6b6c931/0_0_5457_3276/2000.jpg') repeat 50% 50%;
 }
 
 ul {
   list-style: none;
 }
 
+input{
+border-radius: 5px;
+}
 /**
  * top header
  */
@@ -88,7 +92,8 @@ ul {
  */
 .container > header {
   align-items:     center;
-  background:      url('http://prophoto.com.cy/wp-content/galleries/food/food-restaurant-photographer-cyprus-10.jpg') no-repeat 50% 50%;
+/*  background:      url('https://img.buzzfeed.com/buzzfeed-static/static/2015-11/17/17/campaign_images/webdr11/11-breakfast-smoothie-bowls-that-will-make-you-fe-2-20812-1447797747-7_big.jpg') no-repeat 50% 50%;
+  */
   background-size: 100%;
   display:         flex;
   height:          250px;
@@ -99,7 +104,7 @@ ul {
   font-weight:  400;
   font-size:    2em;
   line-height:  1em;
-  margin-left:  220px;
+  margin-left:  60px;
   padding-left: 5px;
 }
 
@@ -110,12 +115,16 @@ ul {
 /**
  * login form
  */
+.flex-container {
+    display: flex;
+}
 #login-form {
   color: #624630;
   margin: 0px auto;
   overflow: auto;
   padding: 40px;
   width: 300px;
+  board: 20px;
 }
 
 #login-form label {
@@ -138,6 +147,42 @@ ul {
 }
 
 #login-error {
+  clear: both;
+  color: #990000;
+  padding-top: 10px;
+}
+
+/**
+ * signup form
+ */
+#signup-form {
+  color: #624630;
+  margin: 0px auto;
+  overflow: auto;
+  padding: 40px;
+  width: 300px;
+}
+
+#signup-form label {
+  display: block;
+}
+
+#signup-form input {
+  border: none;
+  display: block;
+  margin-bottom: 10px;
+  padding: 8px;
+  width: 100%;
+}
+
+#signup-form button {
+  cursor: pointer;
+  float: right;
+  padding: 8px 20px;
+  text-align: right;
+}
+
+#signup-error {
   clear: both;
   color: #990000;
   padding-top: 10px;
@@ -306,4 +351,65 @@ footer ul {
 
 footer ul li {
   flex: 1;
+}
+
+
+:root {
+--bg: #3C465C;
+--primary: #434343;
+--solid: #fff;
+--btn-w: 8em;
+--dot-w: calc(var(--btn-w)*.2);
+--tr-X: calc(var(--btn-w) - var(--btn-w)*.2);
+}
+* {box-sizing: border-box;}
+*:before, *:after {box-sizing: border-box;}
+
+.btn {
+position: relative;
+margin: 30px auto;
+width: var(--btn-w);
+color: var(--primary);
+border: .15em solid var(--primary);
+border-radius: 5em;
+text-transform: uppercase;
+text-align: center;
+font-size: 1.3em;
+line-height: 2em;
+cursor: pointer; 
+}
+.dot {
+content: '';
+position: absolute;
+top: 0;
+width: var(--dot-w);
+height: 100%;
+border-radius: 100%;
+transition: all 300ms ease;
+display: none;
+}
+.dot:after {
+content: '';
+position: absolute;
+left: calc(50% - .4em);
+top: -.4em;
+height: .8em;
+width: .8em;
+background: var(--primary);
+border-radius: 1em;
+border: .25em solid var(--solid);
+box-shadow: 0 0 .7em var(--solid),
+0 0 2em var(--primary);
+}
+.btn:hover .dot,
+.btn:focus .dot {
+animation: atom 2s infinite linear;
+display: block;
+}
+@keyframes atom {
+0% {transform: translateX(0) rotate(0);}
+30%{transform: translateX(var(--tr-X)) rotate(0);}
+50% {transform: translateX(var(--tr-X)) rotate(180deg);}
+80% {transform: translateX(0) rotate(180deg);}
+100% {transform: translateX(0) rotate(360deg);}
 }

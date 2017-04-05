@@ -37,25 +37,24 @@ public class SearchRestaurants extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// allow access only if session exists
 		HttpSession session = request.getSession();
 		if (session.getAttribute("user") == null) {
-			response.setStatus(403);
-			return;
+		response.setStatus(403);
+		return;
 		}
+
 		JSONArray array = new JSONArray();
 		DBConnection connection = new MySQLDBConnection();
-		if (request.getParameterMap().containsKey("user_id") &&
-				request.getParameterMap().containsKey("lat") &&
-				request.getParameterMap().containsKey("lon")) {
-			// term is null or empty by default
-			//String term = request.getParameter("term");
-			//String userId = (String) session.getAttribute("user");
-            //String userId = "1111";
-			String userId = request.getParameter("user_id");
-			double lat = Double.parseDouble(request.getParameter("lat"));
-			double lon = Double.parseDouble(request.getParameter("lon"));
-			//array = connection.searchRestaurants(userId, lat, lon, term);
-			array = connection.searchRestaurants(userId, lat, lon);
+		// DBConnection connection = new MongoDBConnection();
+		if (request.getParameterMap().containsKey("lat") && request.getParameterMap().containsKey("lon")) {
+		// term is null or empty by default
+		String term = request.getParameter("term");
+		// String userId = (String) session.getAttribute("user");
+		String userId = "1111";
+		double lat = Double.parseDouble(request.getParameter("lat"));
+		double lon = Double.parseDouble(request.getParameter("lon"));
+		array = connection.searchRestaurants(userId, lat, lon, term);
 		}
 		RpcParser.writeOutput(response, array);
 
